@@ -68,7 +68,7 @@ def load_data(file_path=None):
             )
         else:
             # For demo purposes, create sample data if no file is provided
-            st.warning("No data file found. Please upload 'CleanedData.csv' to view actual data.")
+            st.warning("No data file found. Please upload 'Building_Permits.csv' to view actual data.")
             return None
 
         # Convert date columns
@@ -329,7 +329,7 @@ def main():
 
     # File uploader
     uploaded_file = st.sidebar.file_uploader(
-        "Upload CleanedData.csv",
+        "Upload Building_Permits.csv",
         type=['csv'],
         help="Upload the building permits CSV file"
     )
@@ -340,12 +340,12 @@ def main():
     else:
         # Try to load from default location
         try:
-            df = load_data("CleanedData.csv")
+            df = load_data("Building_Permits.csv")
         except:
             df = None
 
     if df is None:
-        st.info("👆 Please upload the CleanedData.csv file using the sidebar to begin analysis.")
+        st.info("👆 Please upload the Building_Permits.csv file using the sidebar to begin analysis.")
         st.stop()
 
     # Calculate statistics
@@ -658,3 +658,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
