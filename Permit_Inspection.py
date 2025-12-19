@@ -89,29 +89,35 @@ def load_data(file_path=None):
 
 def calculate_statistics(df):
     """Calculate key statistics from the dataset"""
+    
+    # Define inactive statuses
+    inactive_statuses = [
+        'complete', 'cancelled', 'expired', 'withdrawn', 'revoked', 'disapproved'
+    ]
+    
+    # Create binary status classification
+    status_cleaned = df['Current Status'].apply(
+        lambda x: 'Inactive' if any(status in str(x).lower().strip() for status in inactive_statuses)
+        else 'Active'
+    ) if 'Current Status' in df.columns else None
+    
+    # Calculate statistics
     stats = {
         'total_permits': len(df),
         'total_columns': len(df.columns),
         'memory_usage': df.memory_usage(deep=True).sum() / (1024**2),
         'date_range': (df['Filed Date'].min(), df['Filed Date'].max()) if 'Filed Date' in df.columns else (None, None),
         'unique_neighborhoods': df['Neighborhoods - Analysis Boundaries'].nunique() if 'Neighborhoods - Analysis Boundaries' in df.columns else 0,
+        'active_permits': (status_cleaned == 'Active').sum() if status_cleaned is not None else 0,
+        'inactive_permits': (status_cleaned == 'Inactive').sum() if status_cleaned is not None else 0,
+        'class_balance_ratio': None
     }
     
-    # Get the most common status (likely the "active" one)
-    if 'Current Status' in df.columns:
-        status_counts = df['Current Status'].value_counts()
-        if len(status_counts) > 0:
-            stats['most_common_status'] = status_counts.index[0]
-            stats['most_common_status_count'] = status_counts.iloc[0]
-            stats['most_common_status_pct'] = (status_counts.iloc[0] / len(df) * 100)
-        else:
-            stats['most_common_status'] = 'N/A'
-            stats['most_common_status_count'] = 0
-            stats['most_common_status_pct'] = 0
-    else:
-        stats['most_common_status'] = 'N/A'
-        stats['most_common_status_count'] = 0
-        stats['most_common_status_pct'] = 0
+    # Calculate class balance ratio
+    if status_cleaned is not None:
+        status_counts = status_cleaned.value_counts()
+        if len(status_counts) == 2:
+            stats['class_balance_ratio'] = status_counts.min() / status_counts.max()
     
     return stats
 
@@ -675,4 +681,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
