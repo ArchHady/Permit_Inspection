@@ -29,7 +29,7 @@ import streamlit as st
 from sklearn.preprocessing import OneHotEncoder, RobustScaler, LabelEncoder
 from sklearn.impute import KNNImputer, SimpleImputer
 from sklearn.compose import ColumnTransformer
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.model_selection import train_test_split
 
 # Imbalanced data handling
 from imblearn.over_sampling import SMOTE
@@ -698,7 +698,7 @@ def load_data(file_path=None, uploaded_file=None) -> Optional[pd.DataFrame]:
             
             df = pd.concat(chunks, ignore_index=True)
         else:
-            st.warning("No data file found. Please upload 'CleanedData.csv'")
+            st.warning("No data file found. Please upload 'Building_Permits.csv'")
             return None
         
         # Apply comprehensive data cleaning
@@ -1452,7 +1452,7 @@ def main():
     else:
         # Try to load from default location
         try:
-            df = load_data(file_path="CleanedData.csv")
+            df = load_data(file_path="Building_Permits.csv")
         except:
             pass
     
