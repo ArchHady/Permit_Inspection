@@ -76,20 +76,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("""
-    <style>
-    .header-image img {
-        width: 100%;
-        height: 300px;
-        object-fit: cover;
-        object-position: center;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-st.markdown('<div class="header-image">', unsafe_allow_html=True)
 st.image("https://images.contentstack.io/v3/assets/blt06f605a34f1194ff/bltc85bbcd6ff5fa0fd/650882a0a39cd61ce6ace86f/0_-_BCC-2023-THINGS-TO-DO-IN-SAN-FRANCISCO-AT-NIGHT-0.webp?fit=crop&disable=upscale&auto=webp&quality=60&crop=smart")
-st.markdown('</div>', unsafe_allow_html=True)
 class Config:
     """Application configuration"""
     RANDOM_STATE = 42
