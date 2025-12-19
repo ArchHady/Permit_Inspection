@@ -68,20 +68,20 @@ def load_data(file_path=None):
             )
         else:
             # For demo purposes, create sample data if no file is provided
-            st.warning("No data file found. Please upload 'Building Permits.csv' to view actual data.")
+            st.warning("No data file found. Please upload 'CleanedData.csv' to view actual data.")
             return None
-        
+
         # Convert date columns
         date_columns = [
             'Permit Creation Date', 'Current Status Date', 'Filed Date',
             'Issued Date', 'Completed Date', 'First Construction Document Date',
             'Permit Expiration Date'
         ]
-        
+
         for col in date_columns:
             if col in df.columns:
                 df[col] = pd.to_datetime(df[col], errors='coerce')
-        
+
         return df
     except Exception as e:
         st.error(f"Error loading data: {e}")
@@ -125,7 +125,7 @@ def plot_missing_values(df):
     """Create a visualization of missing values"""
     missing_pct = (df.isnull().sum() / len(df) * 100).sort_values(ascending=False)
     missing_pct = missing_pct[missing_pct > 0]
-    
+
     fig = px.bar(
         x=missing_pct.values,
         y=missing_pct.index,
@@ -142,9 +142,9 @@ def plot_permit_status_distribution(df):
     """Plot distribution of permit statuses"""
     if 'Current Status' not in df.columns:
         return None
-    
+
     status_counts = df['Current Status'].value_counts()
-    
+
     fig = px.pie(
         values=status_counts.values,
         names=status_counts.index,
@@ -158,13 +158,13 @@ def plot_permits_over_time(df):
     """Plot permits filed over time"""
     if 'Filed Date' not in df.columns:
         return None
-    
+
     df_time = df.copy()
     df_time['Year'] = df_time['Filed Date'].dt.year
     df_time['Month'] = df_time['Filed Date'].dt.to_period('M').astype(str)
-    
+
     permits_by_month = df_time.groupby('Month').size().reset_index(name='Count')
-    
+
     fig = px.line(
         permits_by_month,
         x='Month',
@@ -180,9 +180,9 @@ def plot_permits_by_type(df):
     """Plot distribution of permit types"""
     if 'Permit Type Definition' not in df.columns:
         return None
-    
+
     type_counts = df['Permit Type Definition'].value_counts().head(15)
-    
+
     fig = px.bar(
         x=type_counts.values,
         y=type_counts.index,
@@ -199,10 +199,10 @@ def plot_cost_distribution(df):
     """Plot distribution of estimated costs"""
     if 'Estimated Cost' not in df.columns:
         return None
-    
+
     df_cost = df[df['Estimated Cost'].notna() & (df['Estimated Cost'] > 0)].copy()
     df_cost['Log Cost'] = np.log10(df_cost['Estimated Cost'] + 1)
-    
+
     fig = px.histogram(
         df_cost,
         x='Log Cost',
@@ -218,9 +218,9 @@ def plot_neighborhood_analysis(df):
     """Analyze permits by neighborhood"""
     if 'Neighborhoods - Analysis Boundaries' not in df.columns:
         return None
-    
+
     neighborhood_counts = df['Neighborhoods - Analysis Boundaries'].value_counts().head(20)
-    
+
     fig = px.bar(
         x=neighborhood_counts.values,
         y=neighborhood_counts.index,
@@ -237,12 +237,12 @@ def plot_processing_time(df):
     """Analyze permit processing time"""
     if 'Filed Date' not in df.columns or 'Issued Date' not in df.columns:
         return None
-    
+
     df_time = df[(df['Filed Date'].notna()) & (df['Issued Date'].notna())].copy()
     df_time['Processing Days'] = (df_time['Issued Date'] - df_time['Filed Date']).dt.days
     df_time = df_time[df_time['Processing Days'] >= 0]
     df_time = df_time[df_time['Processing Days'] <= df_time['Processing Days'].quantile(0.95)]
-    
+
     fig = px.histogram(
         df_time,
         x='Processing Days',
@@ -258,9 +258,9 @@ def plot_construction_types(df):
     """Analyze proposed construction types"""
     if 'Proposed Construction Type Description' not in df.columns:
         return None
-    
+
     const_types = df['Proposed Construction Type Description'].value_counts()
-    
+
     fig = px.pie(
         values=const_types.values,
         names=const_types.index,
@@ -274,11 +274,11 @@ def plot_stories_analysis(df):
     """Analyze building stories"""
     if 'Number of Proposed Stories' not in df.columns or 'Number of Existing Stories' not in df.columns:
         return None
-    
+
     df_stories = df[(df['Number of Proposed Stories'].notna()) & 
                     (df['Number of Existing Stories'].notna())].copy()
     df_stories = df_stories[df_stories['Number of Proposed Stories'] <= 20]
-    
+
     fig = px.scatter(
         df_stories,
         x='Number of Existing Stories',
@@ -288,14 +288,14 @@ def plot_stories_analysis(df):
                 'Number of Proposed Stories': 'Proposed Stories'},
         opacity=0.5
     )
-    
+
     # Add diagonal line
     max_val = max(df_stories['Number of Existing Stories'].max(), 
                   df_stories['Number of Proposed Stories'].max())
     fig.add_trace(go.Scatter(x=[0, max_val], y=[0, max_val], 
                             mode='lines', name='No Change',
                             line=dict(color='red', dash='dash')))
-    
+
     fig.update_layout(height=500)
     return fig
 
@@ -303,9 +303,9 @@ def plot_supervisor_district(df):
     """Analyze permits by supervisor district"""
     if 'Supervisor District' not in df.columns:
         return None
-    
+
     district_counts = df['Supervisor District'].value_counts().sort_index()
-    
+
     fig = px.bar(
         x=district_counts.index,
         y=district_counts.values,
@@ -322,18 +322,18 @@ def main():
     # Header
     st.markdown('<p class="main-header">🏗️ San Francisco Building Permits Analysis</p>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">Interactive Dashboard for Building Permit Data Exploration</p>', unsafe_allow_html=True)
-    
+
     # Sidebar
     st.sidebar.title("Navigation")
     st.sidebar.markdown("---")
-    
+
     # File uploader
     uploaded_file = st.sidebar.file_uploader(
         "Upload CleanedData.csv",
         type=['csv'],
         help="Upload the building permits CSV file"
     )
-    
+
     # Load data
     if uploaded_file is not None:
         df = load_data(uploaded_file)
@@ -343,17 +343,17 @@ def main():
             df = load_data("CleanedData.csv")
         except:
             df = None
-    
+
     if df is None:
-        st.info("👆 Please upload the Building_Permits.csv file using the sidebar to begin analysis.")
+        st.info("👆 Please upload the CleanedData.csv file using the sidebar to begin analysis.")
         st.stop()
-    
+
     # Calculate statistics
     stats = calculate_statistics(df)
-    
+
     # Sidebar filters
     st.sidebar.markdown("### Filters")
-    
+
     # Date range filter
     if 'Filed Date' in df.columns:
         date_range = st.sidebar.date_input(
@@ -362,30 +362,30 @@ def main():
             min_value=stats['date_range'][0],
             max_value=stats['date_range'][1]
         )
-        
+
         if len(date_range) == 2:
             df = df[(df['Filed Date'] >= pd.Timestamp(date_range[0])) & 
                    (df['Filed Date'] <= pd.Timestamp(date_range[1]))]
-    
+
     # Status filter
     if 'Current Status' in df.columns:
         statuses = ['All'] + sorted(df['Current Status'].dropna().unique().tolist())
         selected_status = st.sidebar.selectbox("Permit Status", statuses)
-        
+
         if selected_status != 'All':
             df = df[df['Current Status'] == selected_status]
-    
+
     # Permit type filter
     if 'Permit Type Definition' in df.columns:
         permit_types = ['All'] + sorted(df['Permit Type Definition'].dropna().unique().tolist())
         selected_type = st.sidebar.selectbox("Permit Type", permit_types)
-        
+
         if selected_type != 'All':
             df = df[df['Permit Type Definition'] == selected_type]
-    
+
     st.sidebar.markdown("---")
     st.sidebar.info(f"Filtered records: {len(df):,}")
-    
+
     # Main content tabs
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📊 Overview",
@@ -394,14 +394,14 @@ def main():
         "💰 Cost & Construction",
         "📋 Data Explorer"
     ])
-    
+
     # Tab 1: Overview
     with tab1:
         st.header("Dataset Overview")
-        
+
         # Key metrics
         col1, col2, col3, col4, col5 = st.columns(5)
-        
+
         with col1:
             st.metric("Total Permits", f"{len(df):,}")
         with col2:
@@ -411,75 +411,52 @@ def main():
         with col4:
             st.metric("Neighborhoods", stats['unique_neighborhoods'])
         with col5:
-            st.metric(
-                f"Most Common Status", 
-                stats['most_common_status'],
-                f"{stats['most_common_status_pct']:.1f}%"
-            )
-        
+            active_pct = (stats['active_permits'] / stats['total_permits'] * 100) if stats['total_permits'] > 0 else 0
+            st.metric("Active Permits", f"{active_pct:.1f}%")
+
         st.markdown("---")
-        
-        # Status breakdown
-        if 'Current Status' in df.columns:
-            st.subheader("Permit Status Breakdown")
-            status_counts = df['Current Status'].value_counts()
-            
-            # Create columns for status metrics
-            num_statuses = min(len(status_counts), 5)
-            cols = st.columns(num_statuses)
-            
-            for idx, (status, count) in enumerate(status_counts.head(5).items()):
-                with cols[idx]:
-                    pct = (count / len(df) * 100)
-                    st.metric(
-                        status.title(), 
-                        f"{count:,}",
-                        f"{pct:.1f}%"
-                    )
-        
-        st.markdown("---")
-        
+
         # Two columns for visualizations
         col1, col2 = st.columns(2)
-        
+
         with col1:
             st.subheader("Permit Status Distribution")
             fig = plot_permit_status_distribution(df)
             if fig:
                 st.plotly_chart(fig, use_container_width=True)
-        
+
         with col2:
             st.subheader("Top Permit Types")
             fig = plot_permits_by_type(df)
             if fig:
                 st.plotly_chart(fig, use_container_width=True)
-        
+
         # Missing values analysis
         st.markdown("---")
         st.subheader("Data Quality: Missing Values Analysis")
-        
+
         col1, col2 = st.columns([2, 1])
-        
+
         with col1:
             fig = plot_missing_values(df)
             if fig:
                 st.plotly_chart(fig, use_container_width=True)
-        
+
         with col2:
             st.markdown("### Key Insights")
             missing_pct = (df.isnull().sum() / len(df) * 100).sort_values(ascending=False)
             missing_pct = missing_pct[missing_pct > 50]
-            
+
             st.markdown("**Columns with >50% missing:**")
             for col, pct in missing_pct.items():
                 st.write(f"- {col}: {pct:.1f}%")
-    
+
     # Tab 2: Temporal Analysis
     with tab2:
         st.header("Temporal Analysis")
-        
+
         col1, col2 = st.columns([2, 1])
-        
+
         with col1:
             st.subheader("Permits Filed Over Time")
             fig = plot_permits_over_time(df)
@@ -487,31 +464,31 @@ def main():
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.warning("No temporal data available")
-        
+
         with col2:
             st.subheader("Key Statistics")
             if 'Filed Date' in df.columns:
                 st.metric("Earliest Permit", df['Filed Date'].min().strftime('%Y-%m-%d'))
                 st.metric("Latest Permit", df['Filed Date'].max().strftime('%Y-%m-%d'))
-                
+
                 # Average permits per year
                 years = (df['Filed Date'].max() - df['Filed Date'].min()).days / 365.25
                 avg_per_year = len(df) / years if years > 0 else 0
                 st.metric("Avg Permits/Year", f"{avg_per_year:,.0f}")
-        
+
         st.markdown("---")
-        
+
         st.subheader("Permit Processing Time Analysis")
         fig = plot_processing_time(df)
         if fig:
             st.plotly_chart(fig, use_container_width=True)
-            
+
             # Processing time statistics
             if 'Filed Date' in df.columns and 'Issued Date' in df.columns:
                 df_time = df[(df['Filed Date'].notna()) & (df['Issued Date'].notna())].copy()
                 df_time['Processing Days'] = (df_time['Issued Date'] - df_time['Filed Date']).dt.days
                 df_time = df_time[df_time['Processing Days'] >= 0]
-                
+
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
                     st.metric("Median Processing", f"{df_time['Processing Days'].median():.0f} days")
@@ -523,13 +500,13 @@ def main():
                     st.metric("Max Processing", f"{df_time['Processing Days'].quantile(0.95):.0f} days (95%)")
         else:
             st.warning("No processing time data available")
-    
+
     # Tab 3: Geographical Analysis
     with tab3:
         st.header("Geographical Analysis")
-        
+
         col1, col2 = st.columns(2)
-        
+
         with col1:
             st.subheader("Top Neighborhoods")
             fig = plot_neighborhood_analysis(df)
@@ -537,7 +514,7 @@ def main():
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.warning("No neighborhood data available")
-        
+
         with col2:
             st.subheader("Supervisor Districts")
             fig = plot_supervisor_district(df)
@@ -545,12 +522,12 @@ def main():
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.warning("No district data available")
-        
+
         # Zipcode analysis
         if 'Zipcode' in df.columns:
             st.markdown("---")
             st.subheader("Zipcode Distribution")
-            
+
             zipcode_counts = df['Zipcode'].value_counts().head(15)
             fig = px.bar(
                 x=zipcode_counts.index.astype(str),
@@ -562,13 +539,13 @@ def main():
             )
             fig.update_layout(height=500, showlegend=False)
             st.plotly_chart(fig, use_container_width=True)
-    
+
     # Tab 4: Cost & Construction
     with tab4:
         st.header("Cost & Construction Analysis")
-        
+
         col1, col2 = st.columns(2)
-        
+
         with col1:
             st.subheader("Estimated Cost Distribution")
             fig = plot_cost_distribution(df)
@@ -576,11 +553,11 @@ def main():
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.warning("No cost data available")
-            
+
             # Cost statistics
             if 'Estimated Cost' in df.columns:
                 cost_data = df[df['Estimated Cost'].notna() & (df['Estimated Cost'] > 0)]['Estimated Cost']
-                
+
                 st.markdown("### Cost Statistics")
                 col_a, col_b, col_c = st.columns(3)
                 with col_a:
@@ -589,7 +566,7 @@ def main():
                     st.metric("Mean Cost", f"${cost_data.mean():,.0f}")
                 with col_c:
                     st.metric("Total Value", f"${cost_data.sum()/1e9:.2f}B")
-        
+
         with col2:
             st.subheader("Construction Types")
             fig = plot_construction_types(df)
@@ -597,18 +574,18 @@ def main():
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.warning("No construction type data available")
-        
+
         st.markdown("---")
-        
+
         st.subheader("Building Stories Analysis")
         fig = plot_stories_analysis(df)
         if fig:
             st.plotly_chart(fig, use_container_width=True)
-            
+
             # Stories statistics
             if 'Number of Proposed Stories' in df.columns:
                 stories_data = df[df['Number of Proposed Stories'].notna()]['Number of Proposed Stories']
-                
+
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
                     st.metric("Avg Stories", f"{stories_data.mean():.1f}")
@@ -621,37 +598,37 @@ def main():
                     st.metric("Single Story", f"{single_story:.1f}%")
         else:
             st.warning("No stories data available")
-    
+
     # Tab 5: Data Explorer
     with tab5:
         st.header("Data Explorer")
-        
+
         st.markdown("### Dataset Preview")
-        
+
         # Show number of records
         st.info(f"Showing {len(df):,} records after filtering")
-        
+
         # Column selector
         all_columns = df.columns.tolist()
         default_columns = [col for col in ['Permit Number', 'Permit Type Definition', 
                                            'Current Status', 'Filed Date', 'Neighborhoods - Analysis Boundaries',
                                            'Estimated Cost'] if col in all_columns]
-        
+
         selected_columns = st.multiselect(
             "Select columns to display",
             options=all_columns,
             default=default_columns
         )
-        
+
         if selected_columns:
             st.dataframe(df[selected_columns].head(100), use_container_width=True)
         else:
             st.dataframe(df.head(100), use_container_width=True)
-        
+
         # Download filtered data
         st.markdown("---")
         st.markdown("### Download Data")
-        
+
         csv = df.to_csv(index=False)
         st.download_button(
             label="📥 Download Filtered Data as CSV",
@@ -659,17 +636,17 @@ def main():
             file_name=f"filtered_permits_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
             mime="text/csv"
         )
-        
+
         # Basic statistics
         st.markdown("---")
         st.markdown("### Statistical Summary")
-        
+
         numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
         if numeric_cols:
             st.dataframe(df[numeric_cols].describe(), use_container_width=True)
         else:
             st.info("No numeric columns to display statistics")
-    
+
     # Footer
     st.markdown("---")
     st.markdown("""
@@ -681,5 +658,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
