@@ -1,4 +1,3 @@
-%%writefile Permit_Inspection.py
 """
 Building Permits Analysis Dashboard
 Interactive Streamlit application for San Francisco Building Permits data analysis
@@ -1795,3 +1794,4 @@ def main():
 # =============================================================================
 if __name__ == "__main__":
     main()
+
