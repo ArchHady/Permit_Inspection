@@ -698,7 +698,7 @@ def load_data(file_path=None, uploaded_file=None) -> Optional[pd.DataFrame]:
             
             df = pd.concat(chunks, ignore_index=True)
         else:
-            st.warning("No data file found. Please upload 'Building_Permits.csv'")
+            st.warning("No data file found. Please upload 'CleanedData.csv'")
             return None
         
         # Apply comprehensive data cleaning
@@ -1452,7 +1452,7 @@ def main():
     else:
         # Try to load from default location
         try:
-            df = load_data(file_path="Building_Permits.csv")
+            df = load_data(file_path="CleanedData.csv")
         except:
             pass
     
@@ -1786,3 +1786,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
