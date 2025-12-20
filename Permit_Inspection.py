@@ -1538,12 +1538,11 @@ def main():
     st.sidebar.info(f"📊 Filtered records: **{len(df):,}** / {stats['total_permits']:,}")
     
     # Main content tabs
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📊 Overview",
         "📈 Temporal Analysis",
         "🏘️ Geographical Analysis",
         "💰 Cost & Construction",
-        "🔍 Data Quality",
         "📋 Data Explorer",
     ])
 
@@ -1586,7 +1585,8 @@ def main():
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.info("No permit type data available")
-    
+        create_data_quality_report(df)
+
     # Tab 2: Temporal Analysis
     with tab2:
         st.header("Temporal Analysis")
@@ -1737,12 +1737,8 @@ def main():
         else:
             st.warning("No stories data available")
     
-    # Tab 5: Data Quality
+    # Tab 5: Data Explorer
     with tab5:
-        create_data_quality_report(df)
-    
-    # Tab 6: Data Explorer
-    with tab6:
         st.header("Data Explorer")
         
         st.markdown("### Dataset Preview")
